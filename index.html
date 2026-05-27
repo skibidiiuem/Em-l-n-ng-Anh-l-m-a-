@@ -17,32 +17,43 @@
         @keyframes spin-fast { 0% { transform: rotate(0deg); } 100% { transform: rotate(3600deg); } }
         @keyframes oscillate { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
         @keyframes float-smoke { 0% { transform: translateY(0px) scale(1); opacity: 0.8; } 100% { transform: translateY(-60px) scale(1.6); opacity: 0; } }
-        @keyframes pulse-heart { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        @keyframes pulse-heart { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
         @keyframes fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Hiệu ứng ảnh bay vòng vòng ngẫu nhiên */
-        @keyframes fly-around-1 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(80px, -60px) rotate(15deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
-        @keyframes fly-around-2 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-100px, 80px) rotate(-20deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
-        @keyframes fly-around-3 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(60px, 90px) rotate(25deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
-        @keyframes fly-around-4 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-70px, -70px) rotate(-15deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
-        @keyframes fly-around-5 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(90px, 40px) rotate(10deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        /* Hiệu ứng Trái tim bùng nổ hoành tráng */
+        @keyframes big-heart-pop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            40% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+        @keyframes heart-fall {
+            0% { transform: translateY(-20px) scale(0.6); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(105vh) scale(1.2); opacity: 0; }
+        }
+
+        .animate-big-heart { animation: big-heart-pop 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .falling-heart { position: absolute; top: -5%; animation: heart-fall linear forwards; pointer-events: none; z-index: 35; }
+
+        /* Hiệu ứng 6 ảnh bay vòng vòng ngẫu nhiên phân tán khắp màn hình */
+        @keyframes fly-around-1 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(60px, -50px) rotate(12deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-2 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-70px, 60px) rotate(-15deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-3 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(50px, 70px) rotate(18deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-4 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-60px, -60px) rotate(-12deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-5 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(70px, 30px) rotate(8deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-6 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-40px, -50px) rotate(-10deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
 
         .fan-blade-spin { animation: spin 1s linear infinite; }
         .fan-blade-spin-fast { animation: spin-fast 0.6s linear infinite; }
         .fan-oscillate { animation: oscillate 1.2s ease-in-out infinite; transform-origin: bottom center; }
         .smoke { animation: float-smoke 1s ease-out infinite; }
-        .snapped { animation: pulse-heart 0.5s infinite; }
+        .snapped { animation: pulse-heart 0.6s infinite; }
         .disk-spin { animation: spin 4s linear infinite; }
         
-        /* Thổi bay tấm nền che phía sau */
-        .blown-away {
-            transform: scale(0) rotate(180deg);
-            opacity: 0;
-            transition: all 2s ease-in-out;
-            pointer-events: none;
-        }
+        .blown-away { transform: scale(0) rotate(180deg); opacity: 0; transition: all 2s ease-in-out; pointer-events: none; }
 
-        /* Giao diện Glassmorphism */
         .glass-panel {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(14px);
@@ -62,7 +73,6 @@
         }
         .soft-btn:hover { transform: translateY(-2px); box-shadow: 4px 6px 15px rgba(244, 63, 94, 0.35); }
 
-        /* Draggable Node */
         .interactive-node { cursor: grab; user-select: none; -webkit-user-drag: none; }
         .interactive-node:active { cursor: grabbing; }
     </style>
@@ -72,6 +82,9 @@
     <audio id="bg-music" src="nhac.mp3" preload="auto" loop></audio>
     <audio id="voice-audio" src="audio.mp3" preload="auto"></audio>
 
+    <div id="heart-rain-container" class="absolute inset-0 pointer-events-none hidden z-30 overflow-hidden"></div>
+    <div id="big-heart-overlay" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden z-40 text-9xl select-none filter drop-shadow-2xl">❤️</div>
+
     <div id="secret-scene" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center select-none bg-gradient-to-tr from-rose-100 via-pink-100 to-sky-100 z-0">
         
         <div id="poem-container" class="mb-6 max-w-md z-10 hidden">
@@ -79,8 +92,8 @@
             <h1 id="poem-line-2" class="text-2xl md:text-3xl font-bold text-rose-600 drop-shadow-sm transition-all duration-500 opacity-0"></h1>
         </div>
 
-        <div id="image-1-container" class="max-w-xs rounded-3xl overflow-hidden shadow-2xl border-4 border-white hidden z-20 mb-4 transition-all duration-500">
-            <img src="https://i.pinimg.com/736x/3c/42/dd/3c42dd06040cdb5bcbca56c6d7a5f7f2.jpg" class="w-full h-auto">
+        <div id="image-1-container" class="max-w-xs max-h-[50vh] rounded-3xl overflow-hidden shadow-2xl border-4 border-white hidden z-20 mb-4 transition-all duration-500">
+            <img src="https://i.pinimg.com/1200x/63/eb/3c/63eb3c6bad61031f04796d9296d96b69.jpg" class="w-full h-full object-cover">
         </div>
 
         <div id="audio-widget-container" class="w-full max-w-[280px] p-6 glass-panel border-2 border-pink-200 hidden z-10 transition-all duration-500 flex flex-col items-center gap-4 animate-fade-in shadow-xl">
@@ -92,26 +105,22 @@
                 <h3 class="text-sm font-bold text-rose-600">Giai điệu tránh nóng cho bấy bì ❤️</h3>
                 <p id="audio-status" class="text-[11px] text-gray-500 mt-1">Đang phát phần quà đặc biệt...</p>
             </div>
-            <button id="widget-play-btn" class="soft-btn px-6 py-2 text-xs rounded-full shadow-xs">
-                TẠM DỪNG ⏸️
-            </button>
+            <button id="widget-play-btn" class="soft-btn px-6 py-2 text-xs rounded-full shadow-xs">TẠM DỪNG ⏸️</button>
         </div>
 
-        <img id="fly-img-1" src="https://i.pinimg.com/736x/5b/50/2b/5b502be7e09a169ba905e5782a483bd3.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="top: 10%; left: 10%; animation: fly-around-1 6s ease-in-out infinite;">
-        <img id="fly-img-2" src="https://i.pinimg.com/736x/42/3d/c3/423dc358cafdf909de277d6321d7e8d1.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 15%; left: 8%; animation: fly-around-2 8s ease-in-out infinite;">
-        <img id="fly-img-3" src="https://i.pinimg.com/1200x/17/75/ae/1775ae2a8718a489721decd4fd3f2d83.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="top: 15%; right: 10%; animation: fly-around-3 7s ease-in-out infinite;">
-        <img id="fly-img-4" src="https://i.pinimg.com/736x/d1/53/10/d153107958d4fc737aea11d5f2fa4ea0.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 20%; right: 8%; animation: fly-around-4 9s ease-in-out infinite;">
-        <img id="fly-img-5" src="https://i.pinimg.com/736x/aa/db/55/aadb55bf5d827f39bff18916df8e56fe.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 45%; left: 40%; animation: fly-around-5 5s ease-in-out infinite;">
+        <img id="fly-img-1" src="https://i.pinimg.com/1200x/63/eb/3c/63eb3c6bad61031f04796d9296d96b69.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="top: 8%; left: 6%; animation: fly-around-1 6s ease-in-out infinite;">
+        <img id="fly-img-2" src="https://i.pinimg.com/1200x/90/15/11/901511324f0cc844b8ffa7603694083c.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 12%; left: 5%; animation: fly-around-2 8s ease-in-out infinite;">
+        <img id="fly-img-3" src="https://i.pinimg.com/736x/03/08/7c/03087c3c7ec42ea017e125932366d4dc.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="top: 12%; right: 6%; animation: fly-around-3 7s ease-in-out infinite;">
+        <img id="fly-img-4" src="https://i.pinimg.com/736x/2c/a9/ea/2ca9ea01888e1c29bc218911aaca04a7.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 18%; right: 5%; animation: fly-around-4 9s ease-in-out infinite;">
+        <img id="fly-img-5" src="https://i.pinimg.com/736x/13/44/e2/1344e2da13d50152ec80faf7afdf5da4.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="top: 40%; left: 8%; animation: fly-around-5 5s ease-in-out infinite;">
+        <img id="fly-img-6" src="https://i.pinimg.com/736x/86/2d/a9/862da989a4b05c80134eee6af7f511bb.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 42%; right: 10%; animation: fly-around-6 6.5s ease-in-out infinite;">
     </div>
-
 
     <div id="game-canvas" class="absolute inset-0 bg-sky-50 flex flex-col items-center justify-between p-6 transition-all duration-700 z-10 origin-center">
         
         <div id="scene-1" class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-8">
             <div class="glass-panel px-6 py-3">
-                <h2 id="game-title" class="text-base font-semibold text-sky-800 text-center">
-                    Bật quạt dưới đây nheee! 🧊
-                </h2>
+                <h2 id="game-title" class="text-base font-semibold text-sky-800 text-center">Bật quạt dưới đây nheee! 🧊</h2>
             </div>
 
             <div id="fan-container" class="relative w-64 h-64 flex flex-col items-center justify-end">
@@ -132,9 +141,7 @@
                 <div class="w-32 h-6 bg-gray-400 rounded-t-xl z-10 shadow-md"></div>
             </div>
 
-            <button id="fan-btn" class="soft-btn px-10 py-4 text-xl rounded-full">
-                BẬT QUẠT KHẨN CẤP 💨
-            </button>
+            <button id="fan-btn" class="soft-btn px-10 py-4 text-xl rounded-full">BẬT QUẠT KHẨN CẤP 💨</button>
         </div>
 
         <div id="scene-2" class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-4 hidden relative select-none">
@@ -146,18 +153,18 @@
             <div id="wire-puzzle-area" class="w-full h-96 bg-zinc-950 rounded-3xl relative border-4 border-zinc-800 overflow-hidden shadow-2xl">
                 <canvas id="wire-canvas" class="absolute inset-0 w-full h-full z-10"></canvas>
 
-                <div id="wire-girl" class="absolute right-8 top-1/4 -translate-y-1/2 flex items-center gap-2 z-20 interactive-node bg-blue-600 border border-blue-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg">
-                    <span>[Mỹ Xuyên Cutie]</span>
-                    <div class="w-5 h-8 text-blue-200 flex items-center justify-center">
+                <div id="wire-girl" class="absolute right-6 top-1/4 -translate-y-1/2 flex items-center gap-1.5 z-20 interactive-node bg-pink-500 border border-pink-300 text-white font-bold text-[11px] px-2 py-1 rounded-xl shadow-lg">
+                    <span>Mỹ Xuyên Cutie</span>
+                    <div class="w-4 h-6 text-pink-200 flex items-center justify-center">
                         <svg viewBox="0 0 12 24" fill="currentColor" class="w-full h-full"><path d="M0 21.35l1.45-1.32C6.6 15.36 10 12.28 10 8.5 10 5.42 7.58 3 4.5 3c-1.74 0-3.41.81-4.5 2.09V21.35z"/></svg>
                     </div>
                 </div>
 
-                <div id="wire-boy" class="absolute left-8 top-3/4 -translate-y-1/2 flex items-center gap-2 z-20 interactive-node bg-red-500 border border-red-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg">
-                    <div class="w-5 h-8 text-red-200 flex items-center justify-center">
+                <div id="wire-boy" class="absolute left-6 top-3/4 -translate-y-1/2 flex items-center gap-1.5 z-20 interactive-node bg-red-500 border border-red-300 text-white font-bold text-[11px] px-2 py-1 rounded-xl shadow-lg">
+                    <div class="w-4 h-6 text-red-200 flex items-center justify-center">
                         <svg viewBox="0 0 12 24" fill="currentColor" class="w-full h-full"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09v16.26z"/></svg>
                     </div>
-                    <span>[Minh Hùng Cục Cứt]</span>
+                    <span>Minh Hùng Cục Cứt</span>
                 </div>
             </div>
             
@@ -171,9 +178,7 @@
             <span class="text-5xl mb-2 block">💥</span>
             <h3 class="text-lg font-bold text-red-600 mb-2">QUẠT CHÁY MẤT RỒI!</h3>
             <p class="text-sm text-gray-700 mb-6">Do thời tiết nóng quá nên quạt đã hỏng, vui lòng sửa lại quạt.</p>
-            <button id="repair-btn" class="soft-btn w-full py-3 text-base rounded-xl">
-                Sửa chữa 🛠️
-            </button>
+            <button id="repair-btn" class="soft-btn w-full py-3 text-base rounded-xl">Sửa chữa 🛠️</button>
         </div>
     </div>
 
@@ -189,7 +194,6 @@
         const gameCanvas = document.getElementById('game-canvas');
         const gameTitle = document.getElementById('game-title');
         
-        // ĐỊNH NGHĨA 2 ĐỐI TƯỢNG AUDIO MỚI
         const bgMusic = document.getElementById('bg-music');
         const voiceAudio = document.getElementById('voice-audio');
 
@@ -205,6 +209,9 @@
         const ctx = canvas.getContext('2d');
         const repairHint = document.getElementById('repair-hint');
 
+        const bigHeartOverlay = document.getElementById('big-heart-overlay');
+        const heartRainContainer = document.getElementById('heart-rain-container');
+
         let isBroken = false, isRepaired = false, isConnected = false;
         let staticWires = [];
 
@@ -213,7 +220,10 @@
         let posBoy = { x: 0, y: 0, ox: 0, oy: 0 };
         let puzzleRect;
 
-        // --- CẢNH 1: BẬT QUẠT & HỎNG ---
+        const BOY_WIDTH = 135;
+        const GIRL_WIDTH = 110;
+        const NODE_HEIGHT = 26;
+
         fanBtn.addEventListener('click', () => {
             if (!isBroken && !isRepaired) {
                 fanBlades.classList.add('fan-blade-spin');
@@ -247,14 +257,13 @@
             setTimeout(setupCanvas, 100);
         });
 
-        // --- CẢNH 2: KHỞI TẠO NÙI DÂY VÀ KÉO THẢ HAI ĐẦU ---
         function setupCanvas() {
             puzzleRect = puzzleArea.getBoundingClientRect();
             canvas.width = puzzleRect.width;
             canvas.height = puzzleRect.height;
 
-            posGirl = { x: canvas.width - 130, y: canvas.height * 0.25, ox: canvas.width - 130, oy: canvas.height * 0.25 };
-            posBoy = { x: 30, y: canvas.height * 0.75, ox: 30, oy: canvas.height * 0.75 };
+            posGirl = { x: canvas.width - (GIRL_WIDTH + 24), y: canvas.height * 0.25, ox: canvas.width - (GIRL_WIDTH + 24), oy: canvas.height * 0.25 };
+            posBoy = { x: 24, y: canvas.height * 0.75, ox: 24, oy: canvas.height * 0.75 };
 
             updateNodePositions();
             generateTangledWires();
@@ -298,20 +307,20 @@
             });
             ctx.globalAlpha = 1.0;
 
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 5;
             ctx.lineCap = 'round';
 
-            // Dây Xanh (Cô ấy)
+            // Dây Hồng (Mỹ Xuyên)
             ctx.beginPath();
-            ctx.moveTo(canvas.width, posGirl.oy);
-            ctx.bezierCurveTo(canvas.width - 50, posGirl.oy, posGirl.x + 50, posGirl.y, posGirl.x + 80, posGirl.y + 15);
-            ctx.strokeStyle = isConnected ? '#22c55e' : '#2563eb';
+            ctx.moveTo(canvas.width, posGirl.oy + (NODE_HEIGHT / 2));
+            ctx.bezierCurveTo(canvas.width - 40, posGirl.oy + (NODE_HEIGHT / 2), posGirl.x + 30, posGirl.y + (NODE_HEIGHT / 2), posGirl.x, posGirl.y + (NODE_HEIGHT / 2));
+            ctx.strokeStyle = isConnected ? '#22c55e' : '#ec4899';
             ctx.stroke();
 
-            // Dây Đỏ (Bạn)
+            // Dây Đỏ (Minh Hùng)
             ctx.beginPath();
-            ctx.moveTo(0, posBoy.oy);
-            ctx.bezierCurveTo(50, posBoy.oy, posBoy.x - 50, posBoy.y, posBoy.x + 30, posBoy.y + 15);
+            ctx.moveTo(0, posBoy.oy + (NODE_HEIGHT / 2));
+            ctx.bezierCurveTo(40, posBoy.oy + (NODE_HEIGHT / 2), posBoy.x + BOY_WIDTH - 30, posBoy.y + (NODE_HEIGHT / 2), posBoy.x + BOY_WIDTH, posBoy.y + (NODE_HEIGHT / 2));
             ctx.strokeStyle = isConnected ? '#22c55e' : '#ef4444';
             ctx.stroke();
         }
@@ -335,7 +344,7 @@
             let cy = clientY - puzzleRect.top;
 
             cx = Math.max(10, Math.min(cx, canvas.width - 100));
-            cy = Math.max(20, Math.min(cy, canvas.height - 20));
+            cy = Math.max(20, Math.min(cy, canvas.height - 40));
 
             if (dragTarget === 'girl') {
                 posGirl.x = cx; posGirl.y = cy;
@@ -349,15 +358,16 @@
         }
 
         function checkConnection() {
-            const boyHeartX = posBoy.x + 90;
-            const boyHeartY = posBoy.y;
-            const girlHeartX = posGirl.x;
-            const girlHeartY = posGirl.y;
+            const boyEdgeX = posBoy.x + BOY_WIDTH;
+            const boyEdgeY = posBoy.y + (NODE_HEIGHT / 2);
+            const girlEdgeX = posGirl.x;
+            const girlEdgeY = posGirl.y + (NODE_HEIGHT / 2);
 
-            const dist = Math.sqrt(Math.pow(boyHeartX - girlHeartX, 2) + Math.pow(boyHeartY - girlHeartY, 2));
+            const dist = Math.sqrt(Math.pow(boyEdgeX - girlEdgeX, 2) + Math.pow(boyEdgeY - girlEdgeY, 2));
             
-            if (dist < 35) {
-                executeSnap((boyHeartX + girlHeartX)/2 - 45, (boyHeartY + girlHeartY)/2);
+            // KHOẢNG CÁCH GẦN (80px) LÀ TỰ ĐỘNG HÚT CHẶT
+            if (dist < 80) {
+                executeSnap((boyEdgeX + girlEdgeX) / 2, (boyEdgeY + girlEdgeY) / 2);
             }
         }
 
@@ -386,17 +396,43 @@
             isConnected = true;
             dragTarget = null;
 
-            posBoy.x = midX - 65; posBoy.y = midY;
-            posGirl.x = midX + 30; posGirl.y = midY;
+            posBoy.x = midX - BOY_WIDTH; posBoy.y = midY - (NODE_HEIGHT / 2);
+            posGirl.x = midX; posGirl.y = midY - (NODE_HEIGHT / 2);
             updateNodePositions();
 
-            wireGirl.className = "absolute flex items-center gap-2 z-20 bg-green-500 border border-green-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg snapped";
-            wireBoy.className = "absolute flex items-center gap-2 z-20 bg-green-500 border border-green-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg snapped";
+            wireGirl.className = "absolute flex items-center gap-1.5 z-20 bg-green-500 border border-green-300 text-white font-bold text-[11px] px-2 py-1 rounded-xl shadow-lg snapped";
+            wireBoy.className = "absolute flex items-center gap-1.5 z-20 bg-green-500 border border-green-300 text-white font-bold text-[11px] px-2 py-1 rounded-xl shadow-lg snapped";
 
             drawEverything();
 
             repairHint.innerText = "❤️ KHỚP LỆNH! Mạch điện tình yêu đã được gắn liền!";
             repairHint.className = "text-sm font-bold text-green-600 text-center min-h-[20px] bg-white/90 px-6 py-1.5 rounded-full shadow-md animate-bounce";
+
+            // HIỆU ỨNG TIM TO XUẤT HIỆN VÀ MƯA TIM RƠI
+            bigHeartOverlay.classList.remove('hidden');
+            bigHeartOverlay.classList.add('animate-big-heart');
+            heartRainContainer.classList.remove('hidden');
+
+            const heartTypes = ['❤️', '💖', '💝', '💕', '💗'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'falling-heart';
+                    heart.innerText = heartTypes[Math.floor(Math.random() * heartTypes.length)];
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.fontSize = Math.random() * 15 + 12 + 'px'; 
+                    heart.style.animationDuration = Math.random() * 2 + 1.5 + 's'; 
+                    heartRainContainer.appendChild(heart);
+                    
+                    setTimeout(() => { heart.remove(); }, 3500);
+                }, i * 60);
+            }
+
+            // TRÁI TIM TO BIẾN MẤT SAU 1.5 GIÂY
+            setTimeout(() => {
+                bigHeartOverlay.classList.add('hidden');
+                bigHeartOverlay.classList.remove('animate-big-heart');
+            }, 1500);
 
             setTimeout(() => {
                 isRepaired = true;
@@ -410,7 +446,7 @@
                 fanBtn.style.color = "#ffffff";
                 fanBtn.classList.add('animate-bounce');
                 gameTitle.innerText = "Quạt đã sửa xong! Hãy nhấn nút để xua tan cái nóng!";
-            }, 2500);
+            }, 2600);
         }
 
         wireGirl.addEventListener('mousedown', (e) => onStart(e, 'girl'));
@@ -423,14 +459,10 @@
         window.addEventListener('touchmove', onMove, { passive: false });
         window.addEventListener('touchend', onEnd);
 
-
-        // ============================== CẢNH 3: CHUỖI HIỆU ỨNG THỔI BAY BÙNG NỔ ==============================
         function startEndSequence() {
-            // Cài đặt âm lượng: Nhạc nền vừa phải, audio nói to rõ ràng
             bgMusic.volume = 0.4;
             voiceAudio.volume = 1.0;
 
-            // Kích hoạt đồng thời cả 2 file
             bgMusic.play().then(() => {
                 musicDisk.classList.add('disk-spin');
             }).catch(() => {
@@ -439,7 +471,6 @@
             
             voiceAudio.play().catch(() => console.log("Chờ tương tác file audio"));
 
-            // Nút bấm tạm dừng/phát lại điều khiển cả 2 file cùng lúc
             widgetPlayBtn.addEventListener('click', () => {
                 if (bgMusic.paused) {
                     bgMusic.play();
@@ -487,10 +518,13 @@
                 audioWidgetContainer.classList.remove('hidden');
                 audioWidgetContainer.style.opacity = "1";
 
-                for (let i = 1; i <= 5; i++) {
+                // KÍCH HOẠT HIỂN THỊ CẢ 6 ẢNH BAY
+                for (let i = 1; i <= 6; i++) {
                     const fImg = document.getElementById(`fly-img-${i}`);
-                    fImg.classList.remove('hidden');
-                    fImg.style.opacity = "1";
+                    if (fImg) {
+                        fImg.classList.remove('hidden');
+                        fImg.style.opacity = "1";
+                    }
                 }
             }, 5400);
         }
