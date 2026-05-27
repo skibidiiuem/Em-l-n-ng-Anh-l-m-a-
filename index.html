@@ -20,6 +20,13 @@
         @keyframes pulse-heart { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
         @keyframes fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* Hiệu ứng chữ bồng bềnh nhẹ nhàng tại chỗ */
+        @keyframes float-text-subtle {
+            0%, 100% { transform: translateY(0px) rotate(-1deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+        .text-floating { animation: float-text-subtle 4s ease-in-out infinite; }
+
         /* Hiệu ứng Trái tim bùng nổ hoành tráng */
         @keyframes big-heart-pop {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
@@ -87,7 +94,7 @@
 
     <div id="secret-scene" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center select-none bg-gradient-to-tr from-rose-100 via-pink-100 to-sky-100 z-0">
         
-        <div id="poem-container" class="mb-6 max-w-md z-10 hidden">
+        <div id="poem-container" class="mb-6 max-w-md z-10 hidden window-filter">
             <h1 id="poem-line-1" class="text-2xl md:text-3xl font-bold text-sky-800 drop-shadow-sm mb-3 transition-all duration-500 opacity-0"></h1>
             <h1 id="poem-line-2" class="text-2xl md:text-3xl font-bold text-rose-600 drop-shadow-sm transition-all duration-500 opacity-0"></h1>
         </div>
@@ -365,7 +372,6 @@
 
             const dist = Math.sqrt(Math.pow(boyEdgeX - girlEdgeX, 2) + Math.pow(boyEdgeY - girlEdgeY, 2));
             
-            // KHOẢNG CÁCH GẦN (80px) LÀ TỰ ĐỘNG HÚT CHẶT
             if (dist < 80) {
                 executeSnap((boyEdgeX + girlEdgeX) / 2, (boyEdgeY + girlEdgeY) / 2);
             }
@@ -408,7 +414,6 @@
             repairHint.innerText = "❤️ KHỚP LỆNH! Mạch điện tình yêu đã được gắn liền!";
             repairHint.className = "text-sm font-bold text-green-600 text-center min-h-[20px] bg-white/90 px-6 py-1.5 rounded-full shadow-md animate-bounce";
 
-            // HIỆU ỨNG TIM TO XUẤT HIỆN VÀ MƯA TIM RƠI
             bigHeartOverlay.classList.remove('hidden');
             bigHeartOverlay.classList.add('animate-big-heart');
             heartRainContainer.classList.remove('hidden');
@@ -428,7 +433,6 @@
                 }, i * 60);
             }
 
-            // TRÁI TIM TO BIẾN MẤT SAU 1.5 GIÂY
             setTimeout(() => {
                 bigHeartOverlay.classList.add('hidden');
                 bigHeartOverlay.classList.remove('animate-big-heart');
@@ -504,6 +508,11 @@
                 line2.style.opacity = "1";
             }, 1200); 
 
+            // SAU KHI CHỮ HIỆN XONG, KÍCH HOẠT CLASS BỒNG BỀNH CHO TOÀN BỘ KHUNG CHỮ
+            setTimeout(() => {
+                poemContainer.classList.add('text-floating');
+            }, 1800);
+
             setTimeout(() => {
                 img1Container.classList.remove('hidden');
                 img1Container.style.opacity = "1";
@@ -518,7 +527,6 @@
                 audioWidgetContainer.classList.remove('hidden');
                 audioWidgetContainer.style.opacity = "1";
 
-                // KÍCH HOẠT HIỂN THỊ CẢ 6 ẢNH BAY
                 for (let i = 1; i <= 6; i++) {
                     const fImg = document.getElementById(`fly-img-${i}`);
                     if (fImg) {
