@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Cả Kho Báu Tình Yêu Cho Em</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <style>
+        * { font-family: 'Poppins', sans-serif; cursor: default; }
+        body { background-color: #ffe4e6; margin: 0; padding: 0; overflow: hidden; }
+
+        /* KEYFRAMES HOẠT HỌA */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-fast { 0% { transform: rotate(0deg); } 100% { transform: rotate(3600deg); } }
+        @keyframes oscillate { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+        @keyframes float-smoke { 0% { transform: translateY(0px) scale(1); opacity: 0.8; } 100% { transform: translateY(-60px) scale(1.6); opacity: 0; } }
+        @keyframes pulse-heart { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Hiệu ứng ảnh bay vòng vòng ngẫu nhiên */
+        @keyframes fly-around-1 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(80px, -60px) rotate(15deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-2 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-100px, 80px) rotate(-20deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-3 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(60px, 90px) rotate(25deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-4 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(-70px, -70px) rotate(-15deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+        @keyframes fly-around-5 { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(90px, 40px) rotate(10deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+
+        .fan-blade-spin { animation: spin 1s linear infinite; }
+        .fan-blade-spin-fast { animation: spin-fast 0.6s linear infinite; }
+        .fan-oscillate { animation: oscillate 1.2s ease-in-out infinite; transform-origin: bottom center; }
+        .smoke { animation: float-smoke 1s ease-out infinite; }
+        .snapped { animation: pulse-heart 0.5s infinite; }
+        .disk-spin { animation: spin 4s linear infinite; }
+        
+        /* Thổi bay tấm nền che phía sau */
+        .blown-away {
+            transform: scale(0) rotate(180deg);
+            opacity: 0;
+            transition: all 2s ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Giao diện Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(244, 63, 94, 0.08);
+        }
+
+        .soft-btn {
+            background: linear-gradient(145deg, #ff9a9e, #fecfef);
+            color: #941b3a;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 12px rgba(244, 63, 94, 0.25);
+            cursor: pointer;
+        }
+        .soft-btn:hover { transform: translateY(-2px); box-shadow: 4px 6px 15px rgba(244, 63, 94, 0.35); }
+
+        /* Draggable Node */
+        .interactive-node { cursor: grab; user-select: none; -webkit-user-drag: none; }
+        .interactive-node:active { cursor: grabbing; }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center bg-rose-50 relative p-4">
+
+    <audio id="bg-music" src="nhac.mp3" preload="auto" loop></audio>
+    <audio id="voice-audio" src="audio.mp3" preload="auto"></audio>
+
+    <div id="secret-scene" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center select-none bg-gradient-to-tr from-rose-100 via-pink-100 to-sky-100 z-0">
+        
+        <div id="poem-container" class="mb-6 max-w-md z-10 hidden">
+            <h1 id="poem-line-1" class="text-2xl md:text-3xl font-bold text-sky-800 drop-shadow-sm mb-3 transition-all duration-500 opacity-0"></h1>
+            <h1 id="poem-line-2" class="text-2xl md:text-3xl font-bold text-rose-600 drop-shadow-sm transition-all duration-500 opacity-0"></h1>
+        </div>
+
+        <div id="image-1-container" class="max-w-xs rounded-3xl overflow-hidden shadow-2xl border-4 border-white hidden z-20 mb-4 transition-all duration-500">
+            <img src="https://i.pinimg.com/736x/3c/42/dd/3c42dd06040cdb5bcbca56c6d7a5f7f2.jpg" class="w-full h-auto">
+        </div>
+
+        <div id="audio-widget-container" class="w-full max-w-[280px] p-6 glass-panel border-2 border-pink-200 hidden z-10 transition-all duration-500 flex flex-col items-center gap-4 animate-fade-in shadow-xl">
+            <div id="music-disk" class="w-28 h-28 rounded-full bg-zinc-900 border-4 border-white shadow-lg flex items-center justify-center relative">
+                <div class="w-8 h-8 rounded-full bg-rose-100 border-4 border-zinc-700"></div>
+                <span class="absolute text-lg">🎵</span>
+            </div>
+            <div class="text-center">
+                <h3 class="text-sm font-bold text-rose-600">Giai điệu tránh nóng cho bấy bì ❤️</h3>
+                <p id="audio-status" class="text-[11px] text-gray-500 mt-1">Đang phát phần quà đặc biệt...</p>
+            </div>
+            <button id="widget-play-btn" class="soft-btn px-6 py-2 text-xs rounded-full shadow-xs">
+                TẠM DỪNG ⏸️
+            </button>
+        </div>
+
+        <img id="fly-img-1" src="https://i.pinimg.com/736x/5b/50/2b/5b502be7e09a169ba905e5782a483bd3.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="top: 10%; left: 10%; animation: fly-around-1 6s ease-in-out infinite;">
+        <img id="fly-img-2" src="https://i.pinimg.com/736x/42/3d/c3/423dc358cafdf909de277d6321d7e8d1.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 15%; left: 8%; animation: fly-around-2 8s ease-in-out infinite;">
+        <img id="fly-img-3" src="https://i.pinimg.com/1200x/17/75/ae/1775ae2a8718a489721decd4fd3f2d83.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="top: 15%; right: 10%; animation: fly-around-3 7s ease-in-out infinite;">
+        <img id="fly-img-4" src="https://i.pinimg.com/736x/d1/53/10/d153107958d4fc737aea11d5f2fa4ea0.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 20%; right: 8%; animation: fly-around-4 9s ease-in-out infinite;">
+        <img id="fly-img-5" src="https://i.pinimg.com/736x/aa/db/55/aadb55bf5d827f39bff18916df8e56fe.jpg" class="absolute w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-4 border-white shadow-lg hidden z-20" style="bottom: 45%; left: 40%; animation: fly-around-5 5s ease-in-out infinite;">
+    </div>
+
+
+    <div id="game-canvas" class="absolute inset-0 bg-sky-50 flex flex-col items-center justify-between p-6 transition-all duration-700 z-10 origin-center">
+        
+        <div id="scene-1" class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-8">
+            <div class="glass-panel px-6 py-3">
+                <h2 id="game-title" class="text-base font-semibold text-sky-800 text-center">
+                    Bật quạt dưới đây nheee! 🧊
+                </h2>
+            </div>
+
+            <div id="fan-container" class="relative w-64 h-64 flex flex-col items-center justify-end">
+                <div id="smoke-effect" class="absolute top-0 hidden z-30">
+                    <span class="smoke absolute text-4xl -left-6">💨</span>
+                    <span class="smoke absolute text-5xl left-2 -top-6" style="animation-delay: 0.2s">💥</span>
+                    <span class="smoke absolute text-3xl -right-6" style="animation-delay: 0.5s">🔥</span>
+                </div>
+                
+                <div class="w-48 h-48 rounded-full bg-white border-6 border-zinc-200 flex items-center justify-center relative shadow-lg">
+                    <div class="absolute w-6 h-6 bg-gray-400 rounded-full z-20 border-2 border-white"></div>
+                    <div id="fan-blades" class="w-40 h-40 relative flex items-center justify-center">
+                        <div class="absolute w-8 h-36 rounded-full opacity-90" style="background: linear-gradient(#0284c7, #bae6fd)"></div>
+                        <div class="absolute w-36 h-8 rounded-full opacity-90" style="background: linear-gradient(90deg, #0284c7, #bae6fd)"></div>
+                    </div>
+                </div>
+                <div class="w-6 h-16 bg-gray-300 z-0 shadow-inner"></div>
+                <div class="w-32 h-6 bg-gray-400 rounded-t-xl z-10 shadow-md"></div>
+            </div>
+
+            <button id="fan-btn" class="soft-btn px-10 py-4 text-xl rounded-full">
+                BẬT QUẠT KHẨN CẤP 💨
+            </button>
+        </div>
+
+        <div id="scene-2" class="w-full max-w-md flex flex-col items-center justify-center flex-grow gap-4 hidden relative select-none">
+            <div class="text-center glass-panel p-4 border border-amber-200 z-20">
+                <h2 class="text-base font-bold text-red-500">⚡ SỰ CỐ: ĐỨT DÂY ĐIỆN RỒI!</h2>
+                <p class="text-xs text-gray-600 mt-1">Trời nóng quá tải làm đứt mạch rồi bấy bì! Hãy cầm cả 2 đầu dây tên hai đứa mình kéo lại với nhau để gắn liền trái tim nhé!</p>
+            </div>
+
+            <div id="wire-puzzle-area" class="w-full h-96 bg-zinc-950 rounded-3xl relative border-4 border-zinc-800 overflow-hidden shadow-2xl">
+                <canvas id="wire-canvas" class="absolute inset-0 w-full h-full z-10"></canvas>
+
+                <div id="wire-girl" class="absolute right-8 top-1/4 -translate-y-1/2 flex items-center gap-2 z-20 interactive-node bg-blue-600 border border-blue-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg">
+                    <span>[Tên Cô Ấy]</span>
+                    <div class="w-5 h-8 text-blue-200 flex items-center justify-center">
+                        <svg viewBox="0 0 12 24" fill="currentColor" class="w-full h-full"><path d="M0 21.35l1.45-1.32C6.6 15.36 10 12.28 10 8.5 10 5.42 7.58 3 4.5 3c-1.74 0-3.41.81-4.5 2.09V21.35z"/></svg>
+                    </div>
+                </div>
+
+                <div id="wire-boy" class="absolute left-8 top-3/4 -translate-y-1/2 flex items-center gap-2 z-20 interactive-node bg-red-500 border border-red-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg">
+                    <div class="w-5 h-8 text-red-200 flex items-center justify-center">
+                        <svg viewBox="0 0 12 24" fill="currentColor" class="w-full h-full"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09v16.26z"/></svg>
+                    </div>
+                    <span>[Tên Bạn]</span>
+                </div>
+            </div>
+            
+            <p id="repair-hint" class="text-xs font-semibold text-rose-500 text-center min-h-[20px] bg-white/80 px-4 py-1 rounded-full"></p>
+        </div>
+
+    </div>
+
+    <div id="modal" class="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden z-50">
+        <div class="glass-panel p-6 max-w-sm w-full text-center border-2 border-rose-200 animate-fade-in">
+            <span class="text-5xl mb-2 block">💥</span>
+            <h3 class="text-lg font-bold text-red-600 mb-2">QUẠT CHÁY MẤT RỒI!</h3>
+            <p class="text-sm text-gray-700 mb-6">Do thời tiết nóng quá nên quạt đã hỏng, vui lòng sửa lại quạt.</p>
+            <button id="repair-btn" class="soft-btn w-full py-3 text-base rounded-xl">
+                Sửa chữa 🛠️
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const fanBtn = document.getElementById('fan-btn');
+        const fanBlades = document.getElementById('fan-blades');
+        const fanContainer = document.getElementById('fan-container');
+        const smokeEffect = document.getElementById('smoke-effect');
+        const modal = document.getElementById('modal');
+        const repairBtn = document.getElementById('repair-btn');
+        const scene1 = document.getElementById('scene-1');
+        const scene2 = document.getElementById('scene-2');
+        const gameCanvas = document.getElementById('game-canvas');
+        const gameTitle = document.getElementById('game-title');
+        
+        // ĐỊNH NGHĨA 2 ĐỐI TƯỢNG AUDIO MỚI
+        const bgMusic = document.getElementById('bg-music');
+        const voiceAudio = document.getElementById('voice-audio');
+
+        const audioWidgetContainer = document.getElementById('audio-widget-container');
+        const musicDisk = document.getElementById('music-disk');
+        const widgetPlayBtn = document.getElementById('widget-play-btn');
+        const audioStatus = document.getElementById('audio-status');
+
+        const puzzleArea = document.getElementById('wire-puzzle-area');
+        const wireGirl = document.getElementById('wire-girl');
+        const wireBoy = document.getElementById('wire-boy');
+        const canvas = document.getElementById('wire-canvas');
+        const ctx = canvas.getContext('2d');
+        const repairHint = document.getElementById('repair-hint');
+
+        let isBroken = false, isRepaired = false, isConnected = false;
+        let staticWires = [];
+
+        let dragTarget = null;
+        let posGirl = { x: 0, y: 0, ox: 0, oy: 0 };
+        let posBoy = { x: 0, y: 0, ox: 0, oy: 0 };
+        let puzzleRect;
+
+        // --- CẢNH 1: BẬT QUẠT & HỎNG ---
+        fanBtn.addEventListener('click', () => {
+            if (!isBroken && !isRepaired) {
+                fanBlades.classList.add('fan-blade-spin');
+                fanContainer.classList.add('fan-oscillate');
+                fanBtn.disabled = true;
+                fanBtn.innerText = "ĐANG MÁT... ❄️";
+
+                setTimeout(() => {
+                    fanBlades.classList.remove('fan-blade-spin');
+                    fanContainer.classList.remove('fan-oscillate');
+                    smokeEffect.classList.remove('hidden');
+                    isBroken = true;
+                    setTimeout(() => { modal.classList.remove('hidden'); }, 400);
+                }, 2000);
+            } else if (isRepaired) {
+                fanBlades.classList.add('fan-blade-spin-fast');
+                fanBtn.disabled = true;
+                fanBtn.innerText = "🌪️ Gió thổi cực mạnh!!!";
+                
+                setTimeout(() => {
+                    gameCanvas.classList.add('blown-away');
+                    startEndSequence();
+                }, 1000);
+            }
+        });
+
+        repairBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            scene1.classList.add('hidden');
+            scene2.classList.remove('hidden');
+            setTimeout(setupCanvas, 100);
+        });
+
+        // --- CẢNH 2: KHỞI TẠO NÙI DÂY VÀ KÉO THẢ HAI ĐẦU ---
+        function setupCanvas() {
+            puzzleRect = puzzleArea.getBoundingClientRect();
+            canvas.width = puzzleRect.width;
+            canvas.height = puzzleRect.height;
+
+            posGirl = { x: canvas.width - 130, y: canvas.height * 0.25, ox: canvas.width - 130, oy: canvas.height * 0.25 };
+            posBoy = { x: 30, y: canvas.height * 0.75, ox: 30, oy: canvas.height * 0.75 };
+
+            updateNodePositions();
+            generateTangledWires();
+            drawEverything();
+        }
+
+        function updateNodePositions() {
+            wireGirl.style.left = `${posGirl.x}px`;
+            wireGirl.style.top = `${posGirl.y}px`;
+            wireBoy.style.left = `${posBoy.x}px`;
+            wireBoy.style.top = `${posBoy.y}px`;
+        }
+
+        function generateTangledWires() {
+            staticWires = [];
+            const colors = ['#22c55e', '#eab308', '#a855f7', '#f97316', '#06b6d4', '#ec4899'];
+            for (let i = 0; i < 15; i++) {
+                staticWires.push({
+                    sx: Math.random() * canvas.width, sy: Math.random() * canvas.height,
+                    cp1x: Math.random() * canvas.width, cp1y: Math.random() * canvas.height,
+                    cp2x: Math.random() * canvas.width, cp2y: Math.random() * canvas.height,
+                    ex: Math.random() * canvas.width, ey: Math.random() * canvas.height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    w: Math.random() * 3 + 2
+                });
+            }
+        }
+
+        function drawEverything() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            staticWires.forEach(w => {
+                ctx.beginPath();
+                ctx.moveTo(w.sx, w.sy);
+                ctx.bezierCurveTo(w.cp1x, w.cp1y, w.cp2x, w.cp2y, w.ex, w.ey);
+                ctx.strokeStyle = w.color;
+                ctx.lineWidth = w.w;
+                ctx.globalAlpha = 0.4;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            });
+            ctx.globalAlpha = 1.0;
+
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+
+            // Dây Xanh (Cô ấy)
+            ctx.beginPath();
+            ctx.moveTo(canvas.width, posGirl.oy);
+            ctx.bezierCurveTo(canvas.width - 50, posGirl.oy, posGirl.x + 50, posGirl.y, posGirl.x + 80, posGirl.y + 15);
+            ctx.strokeStyle = isConnected ? '#22c55e' : '#2563eb';
+            ctx.stroke();
+
+            // Dây Đỏ (Bạn)
+            ctx.beginPath();
+            ctx.moveTo(0, posBoy.oy);
+            ctx.bezierCurveTo(50, posBoy.oy, posBoy.x - 50, posBoy.y, posBoy.x + 30, posBoy.y + 15);
+            ctx.strokeStyle = isConnected ? '#22c55e' : '#ef4444';
+            ctx.stroke();
+        }
+
+        function onStart(e, target) {
+            if (isConnected) return;
+            dragTarget = target;
+            puzzleRect = puzzleArea.getBoundingClientRect();
+            repairHint.innerText = "Cố lên em, gỡ rối kéo 2 dây chạm vào nhau nha! ❤️";
+            repairHint.className = "text-xs font-semibold text-rose-500 text-center min-h-[20px] bg-white/80 px-4 py-1 rounded-full animate-pulse";
+        }
+
+        function onMove(e) {
+            if (!dragTarget || isConnected) return;
+            e.preventDefault();
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            let cx = clientX - puzzleRect.left;
+            let cy = clientY - puzzleRect.top;
+
+            cx = Math.max(10, Math.min(cx, canvas.width - 100));
+            cy = Math.max(20, Math.min(cy, canvas.height - 20));
+
+            if (dragTarget === 'girl') {
+                posGirl.x = cx; posGirl.y = cy;
+            } else if (dragTarget === 'boy') {
+                posBoy.x = cx; posBoy.y = cy;
+            }
+
+            updateNodePositions();
+            drawEverything();
+            checkConnection();
+        }
+
+        function checkConnection() {
+            const boyHeartX = posBoy.x + 90;
+            const boyHeartY = posBoy.y;
+            const girlHeartX = posGirl.x;
+            const girlHeartY = posGirl.y;
+
+            const dist = Math.sqrt(Math.pow(boyHeartX - girlHeartX, 2) + Math.pow(boyHeartY - girlHeartY, 2));
+            
+            if (dist < 35) {
+                executeSnap((boyHeartX + girlHeartX)/2 - 45, (boyHeartY + girlHeartY)/2);
+            }
+        }
+
+        function onEnd() {
+            if (!dragTarget || isConnected) return;
+            dragTarget = null;
+
+            posGirl.x = posGirl.ox; posGirl.y = posGirl.oy;
+            posBoy.x = posBoy.ox; posBoy.y = posBoy.oy;
+
+            wireGirl.style.transition = 'all 0.4s ease';
+            wireBoy.style.transition = 'all 0.4s ease';
+            updateNodePositions();
+            
+            setTimeout(() => {
+                wireGirl.style.transition = 'none';
+                wireBoy.style.transition = 'none';
+                drawEverything();
+            }, 400);
+
+            repairHint.innerText = "Ơ buông tay nhau ra quạt lại tắt đó, kéo sát lại nha!";
+            repairHint.className = "text-xs font-semibold text-amber-600 text-center min-h-[20px] bg-white/80 px-4 py-1 rounded-full";
+        }
+
+        function executeSnap(midX, midY) {
+            isConnected = true;
+            dragTarget = null;
+
+            posBoy.x = midX - 65; posBoy.y = midY;
+            posGirl.x = midX + 30; posGirl.y = midY;
+            updateNodePositions();
+
+            wireGirl.className = "absolute flex items-center gap-2 z-20 bg-green-500 border border-green-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg snapped";
+            wireBoy.className = "absolute flex items-center gap-2 z-20 bg-green-500 border border-green-300 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow-lg snapped";
+
+            drawEverything();
+
+            repairHint.innerText = "❤️ KHỚP LỆNH! Mạch điện tình yêu đã được gắn liền!";
+            repairHint.className = "text-sm font-bold text-green-600 text-center min-h-[20px] bg-white/90 px-6 py-1.5 rounded-full shadow-md animate-bounce";
+
+            setTimeout(() => {
+                isRepaired = true;
+                smokeEffect.classList.add('hidden');
+                scene2.classList.add('hidden');
+                scene1.classList.remove('hidden');
+                
+                fanBtn.disabled = false;
+                fanBtn.innerText = "KÍCH HOẠT SIÊU CẤP TÊN LỬA 🌪️";
+                fanBtn.style.background = "linear-gradient(145deg, #4ade80, #22c55e)";
+                fanBtn.style.color = "#ffffff";
+                fanBtn.classList.add('animate-bounce');
+                gameTitle.innerText = "Quạt đã sửa xong! Hãy nhấn nút để xua tan cái nóng!";
+            }, 2500);
+        }
+
+        wireGirl.addEventListener('mousedown', (e) => onStart(e, 'girl'));
+        wireBoy.addEventListener('mousedown', (e) => onStart(e, 'boy'));
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+
+        wireGirl.addEventListener('touchstart', (e) => onStart(e, 'girl'));
+        wireBoy.addEventListener('touchstart', (e) => onStart(e, 'boy'));
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+
+
+        // ============================== CẢNH 3: CHUỖI HIỆU ỨNG THỔI BAY BÙNG NỔ ==============================
+        function startEndSequence() {
+            // Cài đặt âm lượng: Nhạc nền vừa phải, audio nói to rõ ràng
+            bgMusic.volume = 0.4;
+            voiceAudio.volume = 1.0;
+
+            // Kích hoạt đồng thời cả 2 file
+            bgMusic.play().then(() => {
+                musicDisk.classList.add('disk-spin');
+            }).catch(() => {
+                audioStatus.innerText = "Nhấn nút dưới để nghe quà tặng nhaaa~";
+            });
+            
+            voiceAudio.play().catch(() => console.log("Chờ tương tác file audio"));
+
+            // Nút bấm tạm dừng/phát lại điều khiển cả 2 file cùng lúc
+            widgetPlayBtn.addEventListener('click', () => {
+                if (bgMusic.paused) {
+                    bgMusic.play();
+                    if (!voiceAudio.ended) voiceAudio.play();
+                    musicDisk.classList.add('disk-spin');
+                    widgetPlayBtn.innerText = "TẠM DỪNG ⏸️";
+                    audioStatus.innerText = "Đang phát phần quà đặc biệt...";
+                } else {
+                    bgMusic.pause();
+                    voiceAudio.pause();
+                    musicDisk.classList.remove('disk-spin');
+                    widgetPlayBtn.innerText = "TIẾP TỤC ▶️";
+                    audioStatus.innerText = "Mọi thứ đang tạm dừng rồi bấy bì...";
+                }
+            });
+
+            const line1 = document.getElementById('poem-line-1');
+            const line2 = document.getElementById('poem-line-2');
+            const poemContainer = document.getElementById('poem-container');
+            const img1Container = document.getElementById('image-1-container');
+
+            poemContainer.classList.remove('hidden');
+
+            setTimeout(() => {
+                line1.innerText = "“Nắng buồn gọi gió tha mây”";
+                line1.style.opacity = "1";
+            }, 200);
+
+            setTimeout(() => {
+                line2.innerText = "“Nhớ em anh hóa thây ma mất rồi”";
+                line2.style.opacity = "1";
+            }, 1200); 
+
+            setTimeout(() => {
+                img1Container.classList.remove('hidden');
+                img1Container.style.opacity = "1";
+            }, 2200);
+
+            setTimeout(() => {
+                img1Container.style.opacity = "0";
+                setTimeout(() => { img1Container.remove(); }, 500); 
+            }, 4700);
+
+            setTimeout(() => {
+                audioWidgetContainer.classList.remove('hidden');
+                audioWidgetContainer.style.opacity = "1";
+
+                for (let i = 1; i <= 5; i++) {
+                    const fImg = document.getElementById(`fly-img-${i}`);
+                    fImg.classList.remove('hidden');
+                    fImg.style.opacity = "1";
+                }
+            }, 5400);
+        }
+
+        window.addEventListener('resize', () => {
+            if(scene2.classList.contains('hidden') === false) setupCanvas();
+        });
+    </script>
+</body>
+</html>
