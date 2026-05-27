@@ -464,78 +464,83 @@
         window.addEventListener('touchend', onEnd);
 
         function startEndSequence() {
-            bgMusic.volume = 0.4;
-            voiceAudio.volume = 0.7;
+    bgMusic.volume = 0.4;
+    voiceAudio.volume = 0.7;
 
-            bgMusic.play().then(() => {
-                musicDisk.classList.add('disk-spin');
-            }).catch(() => {
-                audioStatus.innerText = "Nhấn nút dưới để nghe quà tặng nhaaa~";
-            });
-            
-            voiceAudio.play().catch(() => console.log("Chờ tương tác file audio"));
+    bgMusic.play().then(() => {
+        musicDisk.classList.add('disk-spin');
+    }).catch(() => {
+        audioStatus.innerText = "Nhấn nút dưới để nghe quà tặng nhaaa~";
+    });
+    
+    voiceAudio.play().catch(() => console.log("Chờ tương tác file audio"));
 
-            widgetPlayBtn.addEventListener('click', () => {
-                if (bgMusic.paused) {
-                    bgMusic.play();
-                    if (!voiceAudio.ended) voiceAudio.play();
-                    musicDisk.classList.add('disk-spin');
-                    widgetPlayBtn.innerText = "TẠM DỪNG ⏸️";
-                    audioStatus.innerText = "Đang phát phần quà đặc biệt...";
-                } else {
-                    bgMusic.pause();
-                    voiceAudio.pause();
-                    musicDisk.classList.remove('disk-spin');
-                    widgetPlayBtn.innerText = "TIẾP TỤC ▶️";
-                    audioStatus.innerText = "Mọi thứ đang tạm dừng rồi bấy bì...";
-                }
-            });
-
-            const line1 = document.getElementById('poem-line-1');
-            const line2 = document.getElementById('poem-line-2');
-            const poemContainer = document.getElementById('poem-container');
-            const img1Container = document.getElementById('image-1-container');
-
-            poemContainer.classList.remove('hidden');
-
-            setTimeout(() => {
-                line1.innerText = "“Nắng buồn gọi gió tha mây”";
-                line1.style.opacity = "1";
-            }, 1200);
-
-            setTimeout(() => {
-                line2.innerText = "“Nhớ em anh hóa thây ma mất rồi”";
-                line2.style.opacity = "1";
-            }, 2500); 
-
-            // SAU KHI CHỮ HIỆN XONG, KÍCH HOẠT CLASS BỒNG BỀNH CHO TOÀN BỘ KHUNG CHỮ
-            setTimeout(() => {
-                poemContainer.classList.add('text-floating');
-            }, 2000);
-
-            setTimeout(() => {
-                img1Container.classList.remove('hidden');
-                img1Container.style.opacity = "1";
-            }, 2200);
-
-            setTimeout(() => {
-                img1Container.style.opacity = "0";
-                setTimeout(() => { img1Container.remove(); }, 500); 
-            }, 4700);
-
-            setTimeout(() => {
-                audioWidgetContainer.classList.remove('hidden');
-                audioWidgetContainer.style.opacity = "1";
-
-                for (let i = 1; i <= 6; i++) {
-                    const fImg = document.getElementById(`fly-img-${i}`);
-                    if (fImg) {
-                        fImg.classList.remove('hidden');
-                        fImg.style.opacity = "1";
-                    }
-                }
-            }, 5400);
+    widgetPlayBtn.addEventListener('click', () => {
+        if (bgMusic.paused) {
+            bgMusic.play();
+            if (!voiceAudio.ended) voiceAudio.play();
+            musicDisk.classList.add('disk-spin');
+            widgetPlayBtn.innerText = "TẠM DỪNG ⏸️";
+            audioStatus.innerText = "Đang phát phần quà đặc biệt...";
+        } else {
+            bgMusic.pause();
+            voiceAudio.pause();
+            musicDisk.classList.remove('disk-spin');
+            widgetPlayBtn.innerText = "TIẾP TỤC ▶️";
+            audioStatus.innerText = "Mọi thứ đang tạm dừng rồi bấy bì...";
         }
+    });
+
+    const line1 = document.getElementById('poem-line-1');
+    const line2 = document.getElementById('poem-line-2');
+    const poemContainer = document.getElementById('poem-container');
+    const img1Container = document.getElementById('image-1-container');
+
+    poemContainer.classList.remove('hidden');
+
+    // MỐC 1: 1 giây sau khi đổi cảnh -> Hiện câu thơ thứ nhất
+    setTimeout(() => {
+        line1.innerText = "“Nắng buồn gọi gió tha mây”";
+        line1.style.opacity = "1";
+    }, 1000);
+
+    // MỐC 2: 2.5 giây -> Hiện tiếp câu thơ thứ hai (cách câu một 1.5 giây để kịp đọc)
+    setTimeout(() => {
+        line2.innerText = "“Nhớ em anh hóa thây ma mất rồi”";
+        line2.style.opacity = "1";
+    }, 2500); 
+
+    // MỐC 3: 3.2 giây -> Cả hai câu thơ hiện xong xuôi mới bắt đầu bồng bềnh
+    setTimeout(() => {
+        poemContainer.classList.add('text-floating');
+    }, 3200);
+
+    // MỐC 4: 4.2 giây -> Cho người ta ngắm chữ 1 tí rồi ảnh kỷ niệm đầu tiên mới xuất hiện
+    setTimeout(() => {
+        img1Container.classList.remove('hidden');
+        img1Container.style.opacity = "1";
+    }, 4200);
+
+    // MỐC 5: 7.5 giây -> Ảnh đầu tiên mờ dần và biến mất (tồn tại trong 3.3 giây)
+    setTimeout(() => {
+        img1Container.style.opacity = "0";
+        setTimeout(() => { img1Container.remove(); }, 500); 
+    }, 7500);
+
+    // MỐC 6: 8.2 giây -> Cuối cùng là mở trình điều khiển nhạc và Bung xõa 6 ảnh bay vòng quanh
+    setTimeout(() => {
+        audioWidgetContainer.classList.remove('hidden');
+        audioWidgetContainer.style.opacity = "1";
+
+        for (let i = 1; i <= 6; i++) {
+            const fImg = document.getElementById(`fly-img-${i}`);
+            if (fImg) {
+                fImg.classList.remove('hidden');
+                fImg.style.opacity = "1";
+            }
+        }
+    }, 8200);
+}
 
         window.addEventListener('resize', () => {
             if(scene2.classList.contains('hidden') === false) setupCanvas();
